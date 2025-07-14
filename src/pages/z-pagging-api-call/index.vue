@@ -4,7 +4,6 @@
       ref="paging"
       v-model="postList"
       @query="getPostList"
-      :fixed="false"
       :auto-show-back-to-top="true"
       :default-page-size="10"
     >
@@ -44,31 +43,8 @@ import { toRaw , reactive, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 // Refs
 const paging = ref();
-const postList = ref([]);
-let allPosts = [];
-
-onLoad(() => {
-  console.log("See Posts: ", toRaw(myPosts));
-});
-
-
-const myPosts = [
-  // 100 posts
-  { id: 1, title: 'Post 1', body: 'This is the body of post 1' },
-  { id: 2, title: 'Post 2', body: 'This is the body of post 2' },
-  { id: 3, title: 'Post 3', body: 'This is the body of post 3' },
-  { id: 4, title: 'Post 4', body: 'This is the body of post 4' },
-  { id: 5, title: 'Post 5', body: 'This is the body of post 5' }
-] ;
-
-
-// default paging value 
-
-
-
-onLoad(() => {
-  // getPostList(1, 10);
-});
+const postList = ref([]); // Make postList a ref again
+const allPosts = ref([]); // Keep as ref
 
 
 // Fetch all posts from API
@@ -89,7 +65,7 @@ async function fetchAllPosts() {
     const data = res.data || [];
     console.log('Fetched posts:', data.length);
     
-    allPosts = data;
+    allPosts.value = data; // Use .value for ref
     return true;
     
   } catch (error) {
@@ -105,13 +81,6 @@ async function fetchAllPosts() {
 
 // Handle pagination
 async function getPostList(pageNo, pageSize) {
-  
-
-  paging.value.complete([
-    { id: 1, title: 'post title', body: 'post body' }
-  ])
-
-
   console.log(`Fetching page ${pageNo} with size ${pageSize}`);
   if (pageNo === 1) {
     // First load - fetch all data
@@ -126,12 +95,12 @@ async function getPostList(pageNo, pageSize) {
   const start = (pageNo - 1) * pageSize;
   const end = start + pageSize;
 
-  const pageData = allPosts.slice(start, end);
+  const pageData = allPosts.value.slice(start, end); // Use .value
 
   console.log("Slice Posts: ", pageData) /// 10
   // Complete with the paginated data
   paging.value.complete(pageData);
-  console.log(postList.value, "Post List Data");
+  console.log(postList, "Post List Data");
 }
 
 // Handle post click
@@ -143,7 +112,7 @@ function handlePostClick(postId) {
 
 // Manual refresh
 function refreshList() {
-  allPosts.value = [];
+  allPosts.value = []; // Use .value
   paging.value.reload();
 }
 </script>
